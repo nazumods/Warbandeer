@@ -3,6 +3,9 @@ local ui = ns.ui
 local Class, Frame, TableFrame = ns.lua.Class, ui.Frame, ui.TableFrame
 local Label = ui.Label
 
+---@type Maps
+local maps = ns.lua.maps
+
 local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 
 -- balance of power
@@ -23,42 +26,13 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 -- completed class hall quest lines by class
 -- /run local t={-288,-272,3,7,6,0,8,4,9,5,2,1}for i,id in pairs(t) do local _,_,c = GetAchievementCriteriaInfoByID(42565,108648+id)print((GetClassInfo(i)),c and"\124T136814:0\124t"or"\124T136813:0\124t")end
 
-local Appearances = Class(TableFrame, function(self)
-end, {
-  padding = 4,
-  autosize = true,
-  -- headerHeight = 0,
-  headerWidth = 80,
-  colInfo = {
-    {width = 100, backdrop = TransparentBackdrop, name = "Aquired"},
-    {width = 100, backdrop = TransparentBackdrop, name = "Dungeons"},
-    {width = 100, backdrop = TransparentBackdrop, name = "WQs"},
-    {width = 100, backdrop = TransparentBackdrop, name = "Kills"},
-  },
-  rowInfo = {
-    { name = "Hidden" },
-  },
-  GetData = function(self)
-    local data = {}
-    
-    local _,_,_,_,_,_,_,_,_,_,_,_,hidden = GetAchievementInfo(10460)
-    local _,_,_,dc,dt = GetAchievementCriteriaInfo(11152,1)
-    local _,_,_,qc,qt = GetAchievementCriteriaInfo(11153,1)
-    local _,_,_,kc,kt = GetAchievementCriteriaInfo(11154,1)
-    table.insert(data, {
-      { text = hidden and "Yes" or "No" },
-      { text = dc == dt and "Complete" or (dc .. " / " .. dt) },
-      { text = qc == qt and "Complete" or (qc .. " / " .. qt) },
-      { text = kc == kt and "Complete" or (kc .. " / " .. kt) },
-    })
-    
-    return data
-  end,
-})
+-- mage portal and sheep daily
+-- have sheeped it: /run for k,v in pairs{Aszuna=43787,Stormheim=43789,ValSha=43790,Suramar=43791,HighMntn=43788} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)) end
+-- /run f="\124cffffff00\124Hquest:%s:0\124h[%s]\124h\124r: \124cff%s\124r";for k,v in pairs({[44384]="Daily Portal Event Roll",[43828]="Sheep Summon Daily Roll"})do print(format(f,k,v,C_QuestLog.IsQuestFlaggedCompleted(k)and"00ff00Yes"or"ff0000No"))end
 
 local Legion = Class(Frame, function(self)
   local t = ns.api.GetCharacterData()
-  local className = Label:new{
+  self.className = Label:new{
     parent = self,
     text = t.className,
     position = {
@@ -66,18 +40,75 @@ local Legion = Class(Frame, function(self)
     },
   }
 
-  local appearances = Appearances:new{
+  self.hiddenTitle = Label:new{
     parent = self,
+    text = "Hidden Appearance",
     position = {
-      TopLeft = {className, ui.edge.BottomLeft, 0, -10},
+      TopLeft = {self.className, ui.edge.BottomLeft, 0, -10},
     },
   }
+  self.appearances = TableFrame:new{
+    parent = self,
+    position = {
+      TopLeft = {self.hiddenTitle, ui.edge.BottomLeft, 0, -2},
+    },
+    autosize = true,
+    padding = 4,
+    headerHeight = 0,
+    headerWidth = 0,
+    colInfo = {
+      {width = 100, backdrop = TransparentBackdrop},
+      {width = 25, backdrop = TransparentBackdrop},
+    },
+    GetData = function()
+      return t.artifacts and maps.toList(t.artifacts.hidden, function(k, v)
+        return {
+          { text = k },
+          { text = v and "Yes" or "No", color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR },
+        }
+      end) or {}
+    end,
+  }
 
-  self:Height(200)
-  self:Width(400)
+  local recolorTitle = Label:new{
+    parent = self,
+    text = "Recolors",
+    position = {
+      TopLeft = { self.hiddenTitle, ui.edge.TopRight, 10, 0 },
+    },
+  }
+  self.recolors = TableFrame:new{
+    parent = self,
+    position = {
+      TopLeft = {recolorTitle, ui.edge.BottomLeft, 0, -2},
+    },
+    debug = true,
+    autosize = true,
+    padding = 4,
+    headerHeight = 0,
+    headerWidth = 0,
+    colInfo = {
+      {width = 100, backdrop = TransparentBackdrop},
+      {width = 25, backdrop = TransparentBackdrop},
+      {width = 25, backdrop = TransparentBackdrop},
+    },
+    GetData = function()
+      return t.artifacts and maps.toList(t.artifacts.hiddenColors, function(k, v)
+        return {
+          { text = k },
+          { text = v.progress, justifyH = ui.justify.Right },
+          { text = v.goal, justifyH = ui.justify.Right },
+        }
+      end) or {}
+    end,
+  }
 end, {
   name = "legion",
   _title = "Legion",
+  onLoad = function(self)
+    self:Height(math.max(self.recolors:Height(), self.appearances:Height()) + self.hiddenTitle:Height() + self.className:Height() + 14)
+    self:Width(self.hiddenTitle:Width() + self.recolors:Width() + 15)
+  end,
 })
 Legion.name = "legion"
 ns.views.Legion = Legion
