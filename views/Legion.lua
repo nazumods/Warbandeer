@@ -61,7 +61,7 @@ local Legion = Class(Frame, function(self)
       {width = 25, backdrop = TransparentBackdrop},
     },
     GetData = function()
-      return t.artifacts and maps.toList(t.artifacts.hidden, function(k, v)
+      return t.artifacts and t.artifacts.hidden and maps.toList(t.artifacts.hidden, function(k, v)
         return {
           { text = k },
           { text = v and "Yes" or "No", color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR },
@@ -93,7 +93,7 @@ local Legion = Class(Frame, function(self)
       {width = 25, backdrop = TransparentBackdrop},
     },
     GetData = function()
-      return t.artifacts and maps.toList(t.artifacts.hiddenColors, function(k, v)
+      return t.artifacts and t.artifacts.hidden and maps.toList(t.artifacts.hiddenColors, function(k, v)
         return {
           { text = k },
           { text = v.progress, justifyH = ui.justify.Right },
