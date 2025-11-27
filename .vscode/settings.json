@@ -1,0 +1,21 @@
+{
+    "Lua.diagnostics.globals": [
+        "DIM_RED_FONT_COLOR",
+        "DIM_GREEN_FONT_COLOR",
+        "UIParent",
+        "NORMAL_FONT_COLOR",
+        "WHITE_FONT_COLOR",
+        "ITEM_LEGENDARY_COLOR",
+        "ITEM_EPIC_COLOR",
+        "ITEM_SUPERIOR_COLOR",
+        "ITEM_GOOD_COLOR",
+        "ITEM_STANDARD_COLOR",
+        "ITEM_POOR_COLOR",
+        "GameTooltip",
+        "OpenAchievementFrameToAchievement",
+        "CopyTable",
+        "PLAYER_FACTION_COLOR_ALLIANCE",
+        "PLAYER_FACTION_COLOR_HORDE",
+        "NUM_BAG_SLOTS"
+    ]
+}
