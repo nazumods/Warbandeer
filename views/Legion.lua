@@ -3,6 +3,9 @@ local ui = ns.ui
 local Class, Frame, TableFrame = ns.lua.Class, ui.Frame, ui.TableFrame
 local Label = ui.Label
 
+---@type WarbandeerAPI
+local api = ns.api
+
 ---@type Lists
 local lists = ns.lua.lists
 
@@ -33,10 +36,65 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 -- have sheeped it: /run for k,v in pairs{Aszuna=43787,Stormheim=43789,ValSha=43790,Suramar=43791,HighMntn=43788} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)) end
 -- /run f="\124cffffff00\124Hquest:%s:0\124h[%s]\124h\124r: \124cff%s\124r";for k,v in pairs({[44384]="Daily Portal Event Roll",[43828]="Sheep Summon Daily Roll"})do print(format(f,k,v,C_QuestLog.IsQuestFlaggedCompleted(k)and"00ff00Yes"or"ff0000No"))end
 
+-- unholy DK army of the dead
+-- /dump C_QuestLog.IsQuestFlaggedCompleted(44188)
+
+local Appearances = Class(TableFrame, function(self)
+end, {
+  autosize = true,
+  padding = 4,
+  backdrop = TransparentBackdrop,
+  colInfo = {
+    {},
+    {},
+    {},
+    {},
+    {},
+    { name = "Dungeon" },
+    { name = "WQ" },
+    { name = "Kills" },
+  },
+})
+
+function Appearances:GetData()
+  local current = api.GetCharacterData()
+  local data, bc = {}, {}
+  -- get all the _other_ characters
+  local toons = lists.filter(api.GetAllCharacters(), function(t) return t.name ~= current.name end)
+  for _,t in ipairs(toons) do
+    if t.artifacts and t.artifacts.hidden and t.artifacts.hiddenColors then
+      if bc[t.classKey] == nil then bc[t.classKey] = { specs = {}, wq = 0, dungeon = 0, kills = 0 } end
+      local c = bc[t.classKey]
+      for k,v in pairs(t.artifacts.hidden) do
+        if c.specs[k] == nil then c.specs[k] = false end
+        c.specs[k] = c.specs[k] or v
+      end
+      c.wq = t.artifacts.hiddenColors.wq.progress
+      c.dungeon = t.artifacts.hiddenColors.dungeon.progress
+      c.kills = t.artifacts.hiddenColors.kills.progress
+    end
+  end
+  for _,c in ipairs({'DeathKnight', 'DemonHunter', 'Druid', 'Hunter', 'Mage', 'Monk', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior'}) do
+    if bc[c] ~= nil then
+      local s = {{text = c}}
+      for k,v in pairs(bc[c].specs) do
+        table.insert(s, { text = k, color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR })
+      end
+      if #s < 5 then table.insert(s, { text = "" }) end
+      if #s < 5 then table.insert(s, { text = "" }) end
+      table.insert(s, { text = (30 - bc[c].dungeon) .. " left", justifyH = ui.justify.Right })
+      table.insert(s, { text = (200 - bc[c].wq) .. " left", justifyH = ui.justify.Right })
+      table.insert(s, { text = (1000 - bc[c].kills) .. " left", justifyH = ui.justify.Right })
+      table.insert(data, s)
+    end
+  end
+  return data
+end
+
 ---@class Legion: Frame
 ---@field recolors TableFrame
 local Legion = Class(Frame, function(self)
-  local w = 0
+  local h = 0
   local t = ns.api.GetCharacterData()
   self.className = Label:new{
     parent = self,
@@ -45,7 +103,7 @@ local Legion = Class(Frame, function(self)
       TopLeft = {2, -2},
     },
   }
-  w = w + self.className:Height() + 2
+  h = h + self.className:Height() + 2
 
   self.hiddenTitle = Label:new{
     parent = self,
@@ -54,7 +112,7 @@ local Legion = Class(Frame, function(self)
       TopLeft = {self.className, ui.edge.BottomLeft, 0, -10},
     },
   }
-  w = w + self.hiddenTitle:Height() + 10
+  h = h + self.hiddenTitle:Height() + 10
   self.appearances = TableFrame:new{
     parent = self,
     position = {
@@ -101,7 +159,7 @@ local Legion = Class(Frame, function(self)
       {width = 25, backdrop = TransparentBackdrop},
     },
     GetData = function()
-      return t.artifacts and t.artifacts.hidden and lists.map({"dungeon", "wq", "kills"}, function(n)
+      return t.artifacts and t.artifacts.hiddenColors and lists.map({"dungeon", "wq", "kills"}, function(n)
         return {
           { text = n },
           { text = t.artifacts.hiddenColors[n].progress, justifyH = ui.justify.Right },
@@ -110,13 +168,24 @@ local Legion = Class(Frame, function(self)
       end) or {}
     end,
   }
-  w = w + math.max(self.appearances:Height(), self.recolors:Height()) + 2
-  self:Height(w)
+  h = h + math.max(self.appearances:Height(), self.recolors:Height()) + 2
+
+  self.collected = Appearances:new{
+    parent = self,
+    position = {
+      -- todo: adjust for demon hunter
+      Left = {self, ui.edge.BottomLeft, 2, 0},
+      Top = {self.appearances:Height() > self.recolors:Height() and self.appearances or self.recolors, ui.edge.Bottom, 0, -10},
+    },
+  }
+  h = h + self.collected:Height() + 12
+
+  self:Height(h)
 end, {
   name = "legion",
   _title = "Legion",
   onLoad = function(self)
-    self:Width(self.hiddenTitle:Width() + self.recolors:Width() + 15)
+    self:Width(math.max(self.hiddenTitle:Width() + self.recolors:Width() + 10, self.collected:Width()) + 5)
   end,
 })
 Legion.name = "legion"
@@ -124,6 +193,7 @@ ns.views.Legion = Legion
 
 function Legion:OnBeforeShow()
   local t = ns.api.GetCharacterData()
+  if not t.artifacts.hiddenColors or not self.recolors.data then return end
   -- update appearances
   -- update recolors
   self.recolors.data[1][2].text = t.artifacts.hiddenColors.dungeon.progress
