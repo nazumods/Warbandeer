@@ -15,9 +15,9 @@ jobs:
           script: |
             const cl = context.payload.commits.length
             const desc = context.payload.commits.map(c =>
-              `[\`${c.id.substring(0,6)}\`](${c.url}) c.message`
+              `[\`${c.id.substring(0,6)}\`](${c.url}) ${c.message}`
             ).join('\n')
-            console.log({ cl, desc })
+            return { cl, desc }
       #   env:
       #     commits: ${{ toJson(github.event.commits) }}
       #   run: |
@@ -33,6 +33,6 @@ jobs:
           nocontext: true
           title: "${{ github.repository }}"
           description: |
-            ${{ steps.process_event.outputs.result.cl }} new ${{ steps.process_event.outputs.result.cl > 1 && 'commits' || 'commit' }} by ${{ github.actor }}
-            ${{ steps.process_event.outputs.result.desc }}
+            ${{ fromJSON(steps.process_event.outputs.result).cl }} new ${{ fromJSON(steps.process_event.outputs.result).cl > 1 && 'commits' || 'commit' }} by ${{ github.actor }}
+            ${{ fromJSON(steps.process_event.outputs.result).desc }}
           url: "${{ github.server_url }}/${{ github.repository }}"
