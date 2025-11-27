@@ -162,6 +162,7 @@ local achievementIds = ns.lua.lists.fold({
   42513,
   42514,
 }, 15)
+
 local Achievements = Class(TableFrame, function(self)
   self.data = ns.lua.maps.map(
     achievementIds,

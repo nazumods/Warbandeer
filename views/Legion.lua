@@ -43,7 +43,7 @@ local Appearances = Class(TableFrame, function(self)
 end, {
   autosize = true,
   padding = 4,
-  backdrop = TransparentBackdrop,
+  colBackdrop = TransparentBackdrop,
   colInfo = {
     {},
     {},
@@ -90,6 +90,35 @@ function Appearances:GetData()
   end
   return data
 end
+
+local achievementIds = {10459, 11160, 11163}
+
+-- Achievements Table
+local Achievements = Class(TableFrame, function()
+end, {
+  colBackdrop = TransparentBackdrop,
+  autosize = true,
+  headerHeight = 0,
+  headerWidth = 0,
+  GetData = function(self)
+    return ns.lua.maps.map(
+      ns.lua.lists.fold(achievementIds, 3),
+      function(ids)
+        return ns.lua.lists.map(ids, function(achievementId)
+          local _, name, _, completed = GetAchievementInfo(achievementId)
+          return {
+            text = name,
+            color = completed and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR,
+            onClick = function()
+              OpenAchievementFrameToAchievement(achievementId)
+            end,
+          }
+        end)
+      end
+    )
+  end,
+})
+
 
 ---@class Legion: Frame
 ---@field recolors TableFrame
@@ -148,15 +177,14 @@ local Legion = Class(Frame, function(self)
     position = {
       TopLeft = {recolorTitle, ui.edge.BottomLeft, 0, -2},
     },
-    debug = true,
-    autosize = true,
     padding = 4,
     headerHeight = 0,
     headerWidth = 0,
+    colBackdrop = TransparentBackdrop,
     colInfo = {
-      {width = 100, backdrop = TransparentBackdrop},
-      {width = 25, backdrop = TransparentBackdrop},
-      {width = 25, backdrop = TransparentBackdrop},
+      {width = 55},
+      {width = 40},
+      {width = 40},
     },
     GetData = function()
       return t.artifacts and t.artifacts.hiddenColors and lists.map({"dungeon", "wq", "kills"}, function(n)
@@ -169,6 +197,14 @@ local Legion = Class(Frame, function(self)
     end,
   }
   h = h + math.max(self.appearances:Height(), self.recolors:Height()) + 2
+
+  self.achievements = Achievements:new{
+    parent = self,
+    position = {
+      Left = {self.recolors, ui.edge.Right, 10, 0},
+      Top = {0, -2},
+    },
+  }
 
   self.collected = Appearances:new{
     parent = self,
@@ -192,20 +228,11 @@ Legion.name = "legion"
 ns.views.Legion = Legion
 
 function Legion:OnBeforeShow()
-  local t = ns.api.GetCharacterData()
-  if not t.artifacts.hiddenColors or not self.recolors.data then return end
+  local t = api.GetCharacterData()
+  if not t.artifacts or not t.artifacts.hiddenColors then return end
   -- update appearances
   -- update recolors
   self.recolors.data[1][2].text = t.artifacts.hiddenColors.dungeon.progress
   self.recolors.data[2][2].text = t.artifacts.hiddenColors.wq.progress
   self.recolors:update()
-
-  -- if self.data then
-  --   for i,t in pairs(self:GetCharacters()) do
-  --     self.data[i] = self:GetRowData(t)
-  --   end
-  -- else
-  --   self.data = self:GetData()
-  -- end
-  -- self:update()
 end
