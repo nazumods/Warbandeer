@@ -28,6 +28,8 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 
 -- prot warrior event eligible
 -- /run print(C_QuestLog.IsQuestFlaggedCompleted(44311), C_QuestLog.IsQuestFlaggedCompleted(44312))
+-- or
+-- /run for k,v in pairs{Prot_Eligible=44311,Prot_Denied=44312} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)and"\124cff00ff00Yes\124r"or"\124cffff0000No\124r") end
 
 -- completed class hall quest lines by class
 -- /run local t={-288,-272,3,7,6,0,8,4,9,5,2,1}for i,id in pairs(t) do local _,_,c = GetAchievementCriteriaInfoByID(42565,108648+id)print((GetClassInfo(i)),c and"\124T136814:0\124t"or"\124T136813:0\124t")end
