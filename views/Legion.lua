@@ -27,8 +27,6 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 -- /run for q,i in pairs({Event=44326,FeralasActive=44327,FeralasTouched=44331,HinterlandsActive=44328,HinterlandsTouched=44332,DuskwoodActive=44329,DuskwoodTouched=44330}) do print(i,C_QuestLog.IsQuestFlaggedCompleted(i),q) end
 
 -- prot warrior event eligible
--- /run print(C_QuestLog.IsQuestFlaggedCompleted(44311), C_QuestLog.IsQuestFlaggedCompleted(44312))
--- or
 -- /run for k,v in pairs{Prot_Eligible=44311,Prot_Denied=44312} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)and"\124cff00ff00Yes\124r"or"\124cffff0000No\124r") end
 
 -- completed class hall quest lines by class
@@ -40,6 +38,35 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 
 -- unholy DK army of the dead
 -- /dump C_QuestLog.IsQuestFlaggedCompleted(44188)
+
+local instructions = {
+  DeathKnight = {
+    Unholy = "Use Army of the Dead",
+    Blood = "Withered Army Training",
+  },
+  Druid = {
+    Feral = "Dreamgrove entrance, check for portal emote",
+  },
+  Mage = {
+    Frost = "Order Hall stairs, look for emote",
+    Arcane = "Portal into Order Hall, look for sheep emote",
+  },
+  Monk = {
+    Brewmaster = "Tap " .. DARKYELLOW_FONT_COLOR:WrapTextInColorCode("Bubbling Keg") .. " in " .. DARKYELLOW_FONT_COLOR:WrapTextInColorCode("Brewhouse") .. " in Order Hall",
+    Mistweaver = "Kill ".. DARKYELLOW_FONT_COLOR:WrapTextInColorCode("Dragons of Nightmare") .. " in " .. DARKYELLOW_FONT_COLOR:WrapTextInColorCode("Emerald Nightmare") .. " raid",
+    Windwalker = "Withered Army Training",
+  },
+  Paladin = {
+    Protection = "Withered Army Training",
+  },
+  Warlock = {
+    Affliction = "Collect skulls from " .. DARKYELLOW_FONT_COLOR:WrapTextInColorCode("Danger") .. " World Quests",
+  },
+  Warrior = {
+    Fury = "Valarjar exalted, then skulls from Shar'thos and Nith'ogg, and haft from Skovald",
+    Protection = "Path of Huln",
+  },
+}
 
 local Appearances = Class(TableFrame, function(self)
 end, {
@@ -59,10 +86,8 @@ end, {
 })
 
 function Appearances:GetData()
-  local current = api.GetCharacterData()
   local data, bc = {}, {}
-  -- get all the _other_ characters
-  local toons = lists.filter(api.GetAllCharacters(), function(t) return t.name ~= current.name end)
+  local toons = api.GetAllCharacters()
   for _,t in ipairs(toons) do
     if t.artifacts and t.artifacts.hidden and t.artifacts.hiddenColors then
       if bc[t.classKey] == nil then bc[t.classKey] = { specs = {}, wq = 0, dungeon = 0, kills = 0 } end
@@ -80,7 +105,20 @@ function Appearances:GetData()
     if bc[c] ~= nil then
       local s = {{text = c}}
       for k,v in pairs(bc[c].specs) do
-        table.insert(s, { text = k, color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR })
+        local t = {
+          text = k,
+          color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR,
+        }
+        if (not v) and instructions[c] and instructions[c][k] then
+          t.onEnter = function(self)
+            GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
+            GameTooltip:ClearLines()
+            GameTooltip:AddLine(instructions[c][k], 1, 1, 1)
+            GameTooltip:Show()
+          end
+          t.onLeave = function() GameTooltip:Hide() end
+        end
+        table.insert(s, t)
       end
       if #s < 5 then table.insert(s, { text = "" }) end
       if #s < 5 then table.insert(s, { text = "" }) end
@@ -123,118 +161,39 @@ end, {
 
 
 ---@class Legion: Frame
----@field recolors TableFrame
+---@field collected TableFrame
+---@field achievements TableFrame
 local Legion = Class(Frame, function(self)
-  local h = 0
-  local t = ns.api.GetCharacterData()
-  self.className = Label:new{
-    parent = self,
-    text = t.className,
-    position = {
-      TopLeft = {2, -2},
-    },
-  }
-  h = h + self.className:Height() + 2
-
-  self.hiddenTitle = Label:new{
-    parent = self,
-    text = "Hidden Appearance",
-    position = {
-      TopLeft = {self.className, ui.edge.BottomLeft, 0, -10},
-    },
-  }
-  h = h + self.hiddenTitle:Height() + 10
-  self.appearances = TableFrame:new{
-    parent = self,
-    position = {
-      TopLeft = {self.hiddenTitle, ui.edge.BottomLeft, 0, -2},
-    },
-    autosize = true,
-    padding = 4,
-    headerHeight = 0,
-    headerWidth = 0,
-    colInfo = {
-      {width = 100, backdrop = TransparentBackdrop},
-      {width = 25, backdrop = TransparentBackdrop},
-    },
-    GetData = function()
-      return t.artifacts and t.artifacts.hidden and maps.toList(t.artifacts.hidden, function(k, v)
-        return {
-          { text = k },
-          { text = v and "Yes" or "No", color = v and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR },
-        }
-      end) or {}
-    end,
-  }
-
-  local recolorTitle = Label:new{
-    parent = self,
-    text = "Recolors",
-    position = {
-      TopLeft = { self.hiddenTitle, ui.edge.TopRight, 10, 0 },
-    },
-  }
-  self.recolors = TableFrame:new{
-    parent = self,
-    position = {
-      TopLeft = {recolorTitle, ui.edge.BottomLeft, 0, -2},
-    },
-    padding = 4,
-    headerHeight = 0,
-    headerWidth = 0,
-    colBackdrop = TransparentBackdrop,
-    colInfo = {
-      {width = 55},
-      {width = 40},
-      {width = 40},
-    },
-    GetData = function()
-      return t.artifacts and t.artifacts.hiddenColors and lists.map({"dungeon", "wq", "kills"}, function(n)
-        return {
-          { text = n },
-          { text = t.artifacts.hiddenColors[n].progress, justifyH = ui.justify.Right },
-          { text = t.artifacts.hiddenColors[n].goal, justifyH = ui.justify.Right },
-        }
-      end) or {}
-    end,
-  }
-  h = h + math.max(self.appearances:Height(), self.recolors:Height()) + 2
-
-  self.achievements = Achievements:new{
-    parent = self,
-    position = {
-      Left = {self.recolors, ui.edge.Right, 10, 0},
-      Top = {0, -2},
-    },
-  }
+  local h = 2
 
   self.collected = Appearances:new{
     parent = self,
     position = {
-      -- todo: adjust for demon hunter
-      Left = {self, ui.edge.BottomLeft, 2, 0},
-      Top = {self.appearances:Height() > self.recolors:Height() and self.appearances or self.recolors, ui.edge.Bottom, 0, -10},
+      TopLeft = {2, -h},
     },
   }
-  h = h + self.collected:Height() + 12
+  h = h + self.collected:Height()
 
-  self:Height(h)
+  self.achievements = Achievements:new{
+    parent = self,
+    position = {
+      TopLeft = {self.collected, ui.edge.BottomLeft, 0, -10},
+    },
+  }
+  h = h + self.achievements:Height() + 10
+
+  self:Height(h + 2)
 end, {
   name = "legion",
   _title = "Legion",
   onLoad = function(self)
-    self:Width(math.max(self.hiddenTitle:Width() + self.recolors:Width() + 10, self.collected:Width()) + 5)
+    self:Width(self.collected:Width() + 4)
   end,
 })
 Legion.name = "legion"
 ns.views.Legion = Legion
 
 function Legion:OnBeforeShow()
-  local t = api.GetCharacterData()
-  if not t.artifacts or not t.artifacts.hiddenColors then return end
-  -- update appearances
-  -- update recolors
-  self.recolors.data[1][2].text = t.artifacts.hiddenColors.dungeon.progress
-  self.recolors.data[2][2].text = t.artifacts.hiddenColors.wq.progress
-  self.recolors:update()
+  self.collected.data = self.collected:GetData()
+  self.collected:update()
 end
