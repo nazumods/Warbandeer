@@ -20,24 +20,36 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 -- hidden artifact appearance colors
 -- /run local a,x,g,t=0,11152,GetAchievementCriteriaInfo;a=select(13,GetAchievementInfo(10460));print("Unlocked:",a);_,_,_,a,t=g(x,1);print("Dungeons:", a, "/", t);_,_,_,a,t=g(x+1,1);print("WQs:", a, "/", t);_,_,_,a,t=g(x+2,1);print("Kills:", a, "/", t)
 
--- Annals of Light and Shadow
--- /run for k,v in ipairs({44339,44340,44341,44342,44343,44344,44345,44346,44347,44348,44349,44350}) do print(format("%s: %s",k,C_QuestLog.IsQuestFlaggedCompleted(v) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")) end
-
 -- https://www.wowhead.com/item=139552/feather-of-the-moonspirit#comments
--- /run for q,i in pairs({Event=44326,FeralasActive=44327,FeralasTouched=44331,HinterlandsActive=44328,HinterlandsTouched=44332,DuskwoodActive=44329,DuskwoodTouched=44330}) do print(i,C_QuestLog.IsQuestFlaggedCompleted(i),q) end
-
--- prot warrior event eligible
--- /run for k,v in pairs{Prot_Eligible=44311,Prot_Denied=44312} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)and"\124cff00ff00Yes\124r"or"\124cffff0000No\124r") end
 
 -- completed class hall quest lines by class
 -- /run local t={-288,-272,3,7,6,0,8,4,9,5,2,1}for i,id in pairs(t) do local _,_,c = GetAchievementCriteriaInfoByID(42565,108648+id)print((GetClassInfo(i)),c and"\124T136814:0\124t"or"\124T136813:0\124t")end
 
 -- mage portal and sheep daily
 -- have sheeped it: /run for k,v in pairs{Aszuna=43787,Stormheim=43789,ValSha=43790,Suramar=43791,HighMntn=43788} do print(k,C_QuestLog.IsQuestFlaggedCompleted(v)) end
--- /run f="\124cffffff00\124Hquest:%s:0\124h[%s]\124h\124r: \124cff%s\124r";for k,v in pairs({[44384]="Daily Portal Event Roll",[43828]="Sheep Summon Daily Roll"})do print(format(f,k,v,C_QuestLog.IsQuestFlaggedCompleted(k)and"00ff00Yes"or"ff0000No"))end
 
--- unholy DK army of the dead
--- /dump C_QuestLog.IsQuestFlaggedCompleted(44188)
+ns:registerCommand("check", "legion", function()
+  local t = api:GetCharacterData()
+  if t.classKey == 'Warrior' then
+    print('Eligible', C_QuestLog.IsQuestFlaggedCompleted(44311) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Denied', C_QuestLog.IsQuestFlaggedCompleted(44312) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+  elseif t.classKey == 'DeathKnight' then
+    print(C_QuestLog.IsQuestFlaggedCompleted(44188) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+  elseif t.classKey == 'Mage' then
+    print('Daily Portal Event Roll', C_QuestLog.IsQuestFlaggedCompleted(44384) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Sheep Summon Daily Roll', C_QuestLog.IsQuestFlaggedCompleted(43828) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+  elseif t.classKey == 'Druid' then
+    print('Event', C_QuestLog.IsQuestFlaggedCompleted(44326) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Feralas Active', C_QuestLog.IsQuestFlaggedCompleted(44327) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Feralas Touched', C_QuestLog.IsQuestFlaggedCompleted(44331) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Hinterlands Active', C_QuestLog.IsQuestFlaggedCompleted(44328) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Hinterlands Touched', C_QuestLog.IsQuestFlaggedCompleted(44332) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Duskwood Active', C_QuestLog.IsQuestFlaggedCompleted(44329) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Duskwood Touched', C_QuestLog.IsQuestFlaggedCompleted(44330) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+  elseif t.classKey == 'Priest' then
+    for k,v in ipairs({44339,44340,44341,44342,44343,44344,44345,44346,44347,44348,44349,44350}) do print(format("%s: %s",k,C_QuestLog.IsQuestFlaggedCompleted(v) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")) end
+  end
+end)
 
 local instructions = {
   DeathKnight = {
