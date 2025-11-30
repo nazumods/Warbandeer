@@ -108,9 +108,9 @@ function Appearances:GetData()
         if c.specs[k] == nil then c.specs[k] = false end
         c.specs[k] = c.specs[k] or v
       end
-      c.wq = t.artifacts.hiddenColors.wq.progress
-      c.dungeon = t.artifacts.hiddenColors.dungeon.progress
-      c.kills = t.artifacts.hiddenColors.kills.progress
+      c.wq = math.max(c.wq, t.artifacts.hiddenColors.wq.progress)
+      c.dungeon = math.max(c.dungeon, t.artifacts.hiddenColors.dungeon.progress)
+      c.kills = math.max(c.kills, t.artifacts.hiddenColors.kills.progress)
     end
   end
   for _,c in ipairs({'DeathKnight', 'DemonHunter', 'Druid', 'Hunter', 'Mage', 'Monk', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior'}) do
@@ -134,9 +134,21 @@ function Appearances:GetData()
       end
       if #s < 5 then table.insert(s, { text = "" }) end
       if #s < 5 then table.insert(s, { text = "" }) end
-      table.insert(s, { text = (30 - bc[c].dungeon) .. " left", justifyH = ui.justify.Right })
-      table.insert(s, { text = (200 - bc[c].wq) .. " left", justifyH = ui.justify.Right })
-      table.insert(s, { text = (1000 - bc[c].kills) .. " left", justifyH = ui.justify.Right })
+      table.insert(s, {
+        text = bc[c].dungeon == 30 and 'DONE' or (30 - bc[c].dungeon) .. " left",
+        justifyH = ui.justify.Right,
+        color = bc[c].dungeon == 30 and DIM_GREEN_FONT_COLOR,
+      })
+      table.insert(s, {
+        text = bc[c].wq == 200 and 'DONE' or (200 - bc[c].wq) .. " left",
+        justifyH = ui.justify.Right,
+        color = bc[c].wq == 200 and DIM_GREEN_FONT_COLOR,
+      })
+      table.insert(s, {
+        text = bc[c].kills == 1000 and 'DONE' or (1000 - bc[c].kills) .. " left",
+        justifyH = ui.justify.Right,
+        color = bc[c].kills == 1000 and DIM_GREEN_FONT_COLOR,
+      })
       table.insert(data, s)
     end
   end
