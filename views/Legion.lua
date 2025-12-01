@@ -31,10 +31,12 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 ns:registerCommand("check", "legion", function()
   local t = api:GetCharacterData()
   if t.classKey == 'Warrior' then
-    print('Eligible', C_QuestLog.IsQuestFlaggedCompleted(44311) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
-    print('Denied', C_QuestLog.IsQuestFlaggedCompleted(44312) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Prot Eligible', C_QuestLog.IsQuestFlaggedCompleted(44311) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    print('Prot Denied', C_QuestLog.IsQuestFlaggedCompleted(44312) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
   elseif t.classKey == 'DeathKnight' then
-    print(C_QuestLog.IsQuestFlaggedCompleted(44188) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
+    local q = C_QuestLog.IsQuestFlaggedCompleted(44188)
+    print('Withered Army Training:', (q and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r"))
+    --print(C_QuestLog.IsQuestFlaggedCompleted(44188) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
   elseif t.classKey == 'Mage' then
     print('Daily Portal Event Roll', C_QuestLog.IsQuestFlaggedCompleted(44384) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
     print('Sheep Summon Daily Roll', C_QuestLog.IsQuestFlaggedCompleted(43828) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
@@ -47,6 +49,7 @@ ns:registerCommand("check", "legion", function()
     print('Duskwood Active', C_QuestLog.IsQuestFlaggedCompleted(44329) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
     print('Duskwood Touched', C_QuestLog.IsQuestFlaggedCompleted(44330) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
   elseif t.classKey == 'Priest' then
+    print('Discipline Hidden Appearance Quests:')
     for k,v in ipairs({44339,44340,44341,44342,44343,44344,44345,44346,44347,44348,44349,44350}) do print(format("%s: %s",k,C_QuestLog.IsQuestFlaggedCompleted(v) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")) end
   end
 end)
