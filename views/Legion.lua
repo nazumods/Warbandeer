@@ -35,7 +35,7 @@ ns:registerCommand("check", "legion", function()
     print('Prot Denied', C_QuestLog.IsQuestFlaggedCompleted(44312) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
   elseif t.classKey == 'DeathKnight' then
     local q = C_QuestLog.IsQuestFlaggedCompleted(44188)
-    print('Withered Army Training:', (q and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r"))
+    print('Unholy - Special Army of the Dead Summoned:', (q and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r"))
     --print(C_QuestLog.IsQuestFlaggedCompleted(44188) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
   elseif t.classKey == 'Mage' then
     print('Daily Portal Event Roll', C_QuestLog.IsQuestFlaggedCompleted(44384) and "\124cff00ff00Yes\124r" or "\124cffff0000No\124r")
