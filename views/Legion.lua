@@ -17,11 +17,6 @@ local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 -- balance of power
 -- /run for _,i in ipairs({43496,40668,43517,43514,43518,43519,43520,43521,43522,43527,43523,40673,43525,40675,43524,40678,43526,40603,40608,40613,40672,40614,40615,43528,43898,43531,43530,43532,43533}) do print(i, C_QuestLog.IsQuestFlaggedCompleted(i)) end
 
--- hidden artifact appearance colors
--- /run local a,x,g,t=0,11152,GetAchievementCriteriaInfo;a=select(13,GetAchievementInfo(10460));print("Unlocked:",a);_,_,_,a,t=g(x,1);print("Dungeons:", a, "/", t);_,_,_,a,t=g(x+1,1);print("WQs:", a, "/", t);_,_,_,a,t=g(x+2,1);print("Kills:", a, "/", t)
-
--- https://www.wowhead.com/item=139552/feather-of-the-moonspirit#comments
-
 -- completed class hall quest lines by class
 -- /run local t={-288,-272,3,7,6,0,8,4,9,5,2,1}for i,id in pairs(t) do local _,_,c = GetAchievementCriteriaInfoByID(42565,108648+id)print((GetClassInfo(i)),c and"\124T136814:0\124t"or"\124T136813:0\124t")end
 
@@ -97,6 +92,7 @@ end, {
     { name = "Dungeon" },
     { name = "WQ" },
     { name = "Kills" },
+    { name = "Class Hall" },
   },
 })
 
@@ -105,7 +101,7 @@ function Appearances:GetData()
   local toons = api.GetAllCharacters()
   for _,t in ipairs(toons) do
     if t.artifacts and t.artifacts.hidden and t.artifacts.hiddenColors then
-      if bc[t.classKey] == nil then bc[t.classKey] = { specs = {}, wq = 0, dungeon = 0, kills = 0 } end
+      if bc[t.classKey] == nil then bc[t.classKey] = { specs = {}, wq = 0, dungeon = 0, kills = 0, ch = false } end
       local c = bc[t.classKey]
       for k,v in pairs(t.artifacts.hidden) do
         if c.specs[k] == nil then c.specs[k] = false end
@@ -114,6 +110,7 @@ function Appearances:GetData()
       c.wq = math.max(c.wq, t.artifacts.hiddenColors.wq.progress)
       c.dungeon = math.max(c.dungeon, t.artifacts.hiddenColors.dungeon.progress)
       c.kills = math.max(c.kills, t.artifacts.hiddenColors.kills.progress)
+      c.ch = c.ch or (t.IsLegionTimerunner and t.artifacts.classHall)
     end
   end
   for _,c in ipairs({'DeathKnight', 'DemonHunter', 'Druid', 'Hunter', 'Mage', 'Monk', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior'}) do
@@ -151,6 +148,11 @@ function Appearances:GetData()
         text = bc[c].kills == 1000 and 'DONE' or (1000 - bc[c].kills) .. " left",
         justifyH = ui.justify.Right,
         color = bc[c].kills == 1000 and DIM_GREEN_FONT_COLOR,
+      })
+      table.insert(s, {
+        text = bc[c].ch and 'DONE' or '',
+        color = bc[c].ch and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR,
+        justifyH = ui.justify.Center,
       })
       table.insert(data, s)
     end
