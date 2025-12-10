@@ -67,7 +67,7 @@ function Characters:Refresh()
   for i,t in ipairs(toons) do
     self.data[i] = self:GetRowData(t)
   end
-  -- self:update()
+  self:update()
 end
 
 local FACTIONS = {
