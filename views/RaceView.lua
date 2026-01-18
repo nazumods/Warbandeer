@@ -35,11 +35,12 @@ local RaceView = Class(TableFrame, function(self)
     local colIdx = ns.lua.lists.find(Classes, t.className)
     if self.data[rowIdx][colIdx].text ~= nil then
       self.data[rowIdx][colIdx].text = self.data[rowIdx][colIdx].text .. "\n" .. t.name
-      self.rows[rowIdx]:Height(max((self.rows[rowIdx]):Height(), self.data[rowIdx][colIdx].count * self.cellHeight))
-      if self.data[rowIdx][colIdx].count > 1 then
-        h = h + self.cellHeight
-      end
       self.data[rowIdx][colIdx].count = self.data[rowIdx][colIdx].count + 1
+      if self.data[rowIdx][colIdx].count > 1 then
+        h = h + 14
+      end
+      local row = self.rows[rowIdx]
+      row:Height(max(row:Height(), self.data[rowIdx][colIdx].count * 14 + 4))
     else
       self.data[rowIdx][colIdx] = {
         color = ns.Colors[t.classKey or t.className],
@@ -67,6 +68,8 @@ local RaceView = Class(TableFrame, function(self)
 end, {
   name = "races",
   _title = "Races",
+  autosize = true,
+  padding = 4,
   colInfo = Map(Classes, function(c, i)
     local classKey = gsub(c, " ","")
     return {
@@ -80,6 +83,7 @@ end, {
     return {
       name = r,
       color = i <= #ns.api.ALLIANCE_RACES and PLAYER_FACTION_COLOR_ALLIANCE or PLAYER_FACTION_COLOR_HORDE,
+      justifyH = ui.justify.Left,
       backdrop = {color = {0,0,0,i % 2 == 0 and 0.2 or 0}},
     }
   end),
