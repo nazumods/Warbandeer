@@ -4,12 +4,12 @@ local Strings = ns.Colors.Strings
 ns.data = {}
 
 local gearTiers = {
-  explorer = 642,
-  adventurer = 655,
-  veteran = 668,
-  champion = 681,
-  hero = 694,
-  mythic = 707,
+  explorer = 98,
+  adventurer = 102,
+  veteran = 108,
+  champion = 121,
+  hero = 134,
+  mythic = 147,
 }
 ns.data.gearTiers = gearTiers
 
