@@ -184,14 +184,14 @@ insert(
   }
 )
 
-insert(
-  ns.SummaryColumns,
-  SummaryColumn:new{
-    name = "U",
-    justifyH = ui.justify.Center,
-    getData = function(t) return t.quests and t.quests.UndermineStoryMode and GreenCheck or "" end,
-  }
-)
+-- insert(
+--   ns.SummaryColumns,
+--   SummaryColumn:new{
+--     name = "U",
+--     justifyH = ui.justify.Center,
+--     getData = function(t) return t.quests and t.quests.UndermineStoryMode and GreenCheck or "" end,
+--   }
+-- )
 
 local function formatBestVaultRewardOption(o)
   if not o or o.best == 0 then return nil end
@@ -268,13 +268,13 @@ insert(
   }
 )
 
--- insert(
---   ns.SummaryColumns,
---   SummaryColumn:new{
---     icon = Icons.Nightfall,
---     getData = function(t) return t.weeklies and t.weeklies.nightfall and GreenCheck or "" end,
---   }
--- )
+ insert(
+   ns.SummaryColumns,
+   SummaryColumn:new{
+     icon = Icons.preMidnight,
+     getData = function(t) return t.weeklies and t.weeklies.preMidnight and (t.weeklies.preMidnight.three or t.weeklies.preMidnight.eight) and GreenCheck or "" end,
+   }
+ )
 
 -- insert(
 --   ns.SummaryColumns,
