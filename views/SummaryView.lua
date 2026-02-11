@@ -5,7 +5,7 @@ local insert, filter = table.insert, ns.lua.lists.filter
 local Colors, alpha = ns.Colors, ns.Colors.alpha
 local Class, TableFrame, Texture, Label = ns.lua.Class, ui.TableFrame, ui.Texture, ui.Label
 
-local SummaryView = Class(TableFrame, function(self)
+local ClassSummary = Class(TableFrame, function(self)
   local RestoredCofferKey = GetCurrencyInfo(3028)
   self.cols[10].header.texture:Texture(RestoredCofferKey.iconFileID)
   self.cols[10].header.texture:Coords(0.1, 0.9, 0.1, 0.9)
@@ -92,16 +92,15 @@ local SummaryView = Class(TableFrame, function(self)
     text = reagent,
   }
 end, {
-  name = "summary",
-  _title = "Summary",
+  isAlliance = true,
   colInfo = ns.lua.lists.map(ns.SummaryColumns, function(c) return c.colInfo end),
 })
-SummaryView.name = "summary"
-ns.views.SummaryView = SummaryView
 
-function SummaryView:GetCharacters()
+function ClassSummary:GetCharacters()
   local toons = ns.api.GetAllCharacters() -- returns a copy
-  toons = filter(toons, function(t) return not t.IsLegionTimerunner end)
+  toons = filter(toons, function(t)
+    return not t.IsLegionTimerunner and t.isAlliance == self.isAlliance
+  end)
   -- sort by level, then ilvl, then name
   table.sort(toons, function(c1, c2)
     if c1.basic.level ~= c2.basic.level then return c1.basic.level > c2.basic.level end
@@ -111,13 +110,37 @@ function SummaryView:GetCharacters()
   return toons
 end
 
-function SummaryView:GetRowData(toon)
+function ClassSummary:GetRowData(toon)
   return ns.lua.lists.map(ns.SummaryColumns, function(c) return c.getData(toon) end)
 end
 
-function SummaryView:OnBeforeShow()
+function ClassSummary:OnBeforeShow()
   for i,t in pairs(self:GetCharacters()) do
     self.data[i] = self:GetRowData(t)
   end
   self:update()
 end
+
+local SummaryView = Class(ui.Frame, function(self)
+  self.alliance = ClassSummary:new{
+    parent = self,
+    position = {
+      TopLeft = {},
+    },
+  }
+  self.horde = ClassSummary:new{
+    parent = self,
+    position = {
+      TopLeft = {self.alliance, ui.edge.TopRight, 20, 0},
+    },
+    isAlliance = false,
+  }
+
+  self:Height(math.max(self.alliance:Height(), self.horde:Height()))
+  self:Width(20 + self.alliance:Width() + self.horde:Width())
+end, {
+  name = "summary",
+  _title = "Summary",
+})
+SummaryView.name = "summary"
+ns.views.SummaryView = SummaryView
