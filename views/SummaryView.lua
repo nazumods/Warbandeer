@@ -144,3 +144,8 @@ end, {
 })
 SummaryView.name = "summary"
 ns.views.SummaryView = SummaryView
+
+function SummaryView:OnBeforeShow()
+  self.alliance:OnBeforeShow()
+  self.horde:OnBeforeShow()
+end
