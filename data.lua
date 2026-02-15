@@ -11,6 +11,17 @@ local gearTiers = {
   hero = 134,
   mythic = 147,
 }
+
+-- Ready for Midnight
+-- local gearTiers = {
+--   explorer = 207,
+--   adventurer = 220,
+--   veteran = 233,
+--   champion = 246,
+--   hero = 259,
+--   mythic = 272,
+-- }
+
 ns.data.gearTiers = gearTiers
 
 function ns.IlvlColor(ilvl)
