@@ -19,6 +19,7 @@ local ClassSummary = Class(TableFrame, function(self)
   local toons = self:GetCharacters()
   for _,t in pairs(toons) do
     insert(self.data, self:GetRowData(t))
+    -- Wil it doesn't like it on line 41 if n == 0, FYI
     if t.basic.level == 80 then n = n + 1 end
     if t.items and t.items.reagentBag and t.items.reagentBag.slots < 36 then
       reagent = reagent + 1
