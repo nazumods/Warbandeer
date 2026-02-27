@@ -82,7 +82,7 @@ local getILvlString = function(toon)
     end
   end
   return {
-    text = toon.basic.level < 90 and (ITEM_STANDARD_COLOR:WrapTextInColorCode(toon.equipment.ilvl)) or ns.IlvlColor(toon.equipment.ilvl),
+    text = toon.basic.level < ns.wow.maxLevel and (ITEM_STANDARD_COLOR:WrapTextInColorCode(toon.equipment.ilvl)) or ns.IlvlColor(toon.equipment.ilvl),
     onEnter = function(self)
       GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
       GameTooltip:ClearLines()

@@ -13,14 +13,13 @@ local ClassSummary = Class(TableFrame, function(self)
   ns.SummaryColumnsDelayed(self)
 
   self.data = {}
-  local n = 0
+  local n = 1
   local bags = 0
   local reagent = 0
   local toons = self:GetCharacters()
   for _,t in pairs(toons) do
     insert(self.data, self:GetRowData(t))
-    -- Wil it doesn't like it on line 41 if n == 0, FYI
-    if t.basic.level == 80 then n = n + 1 end
+    if t.basic.level == ns.wow.maxLevel then n = n + 1 end
     if t.items and t.items.reagentBag and t.items.reagentBag.slots < 36 then
       reagent = reagent + 1
     end
@@ -38,15 +37,15 @@ local ClassSummary = Class(TableFrame, function(self)
   local divider = Texture:new{
     parent = self,
     position = {
-      TopLeft = {self.rows[n], ui.edge.BottomLeft, -20, 0},
-      TopRight = {self.cells[n][3], ui.edge.BottomRight, 0, -1},
+      TopLeft = {self.rows[n], ui.edge.TopLeft, -20, 0},
+      TopRight = {self.cells[n][3], ui.edge.TopRight, 0, -1},
       Height = 1,
     },
     color = alpha(WHITE_FONT_COLOR, 0.5),
   }
   -- bump the next row down
-  if self.rows[n + 1] then
-    self.rows[n + 1]:TopLeft(self.rows[n], ui.edge.BottomLeft, 0, -1)
+  if n > 1 and self.rows[n] then
+    self.rows[n]:TopLeft(self.rows[n + 1], ui.edge.BottomLeft, 0, -1)
     self:Height(self:Height() + 1)
   end
   local counter = Label:new{
@@ -54,7 +53,7 @@ local ClassSummary = Class(TableFrame, function(self)
     position = {
       BottomRight = {divider, ui.edge.TopLeft, 15, 1},
     },
-    text = n,
+    text = n - 1,
     color = alpha(WHITE_FONT_COLOR, 0.5),
   }
   local subCounter = Label:new{
