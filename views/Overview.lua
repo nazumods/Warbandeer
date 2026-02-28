@@ -1,17 +1,17 @@
 local _, ns = ...
 local insert = table.insert
 local ui = ns.ui
-local Class, Frame, TableFrame, Texture, Label = ns.lua.Class, ui.Frame, ui.TableFrame, ui.Texture, ui.Label
+local Class, Frame, TableFrame, TabFrame, Texture, Label = ns.lua.Class, ui.Frame, ui.TableFrame, ui.TabFrame, ui.Texture, ui.Label
 local GetMajorFactionIDs = C_MajorFactions.GetMajorFactionIDs
 local GetMajorFactionData, GetFactionDataByID = C_MajorFactions.GetMajorFactionData, C_Reputation.GetFactionDataByID
 local GetRenownLevels, IsFactionParagon = C_MajorFactions.GetRenownLevels, C_Reputation.IsFactionParagon
 
 local TransparentBackdrop = {color = ns.Colors.TransparentBlack}
 
--- table of current expansion reputations and their progress
+-- table of reputations for a given expansion level
 local Factions = Class(TableFrame, function(self)
   self.data = {}
-  local factions = GetMajorFactionIDs(GetServerExpansionLevel())
+  local factions = GetMajorFactionIDs(self.expansionLevel)
   for _, factionID in ipairs(factions) do
     local info = GetMajorFactionData(factionID)
     local levels = GetRenownLevels(factionID)
@@ -50,6 +50,7 @@ local Factions = Class(TableFrame, function(self)
     end
   end
 end, {
+  expansionLevel = 10,  -- LE_EXPANSION_THE_WAR_WITHIN
   headerHeight = 0,
   headerWidth = 0,
   colInfo = {
@@ -60,16 +61,19 @@ end, {
 
 -- Table of top toon per class
 local TopAlts = Class(TableFrame, function(self)
-  -- autoadjust name width
+  -- fit col 2 to the widest name
   local w = 0
-  for _,r in ipairs(self.cells) do
-    if #r > 2 then
-      w = max(w, r[2].label:Width())
+  for _, r in ipairs(self.cells) do
+    if r[2] and r[2].label then
+      w = max(w, r[2].label._widget:GetUnboundedStringWidth())
     end
   end
-  self.cols[2]:Width(w)
-  self.rowArea:Width(self.rowArea:Width() + w)
-  self:Width(self:Width() + w)
+  if w > 0 then
+    local delta = w - self.cols[2]:Width()
+    self.cols[2]:Width(w)
+    self.rowArea:Width(self.rowArea:Width() + delta)
+    self:Width(self:Width() + delta)
+  end
 end, {
   headerHeight = 0,
   headerWidth = 0,
@@ -127,37 +131,35 @@ local GreenCheck = {
   },
 }
 
-local achievementIds = {20597, 40791, 20596, 40309, 40360, 41052, 40618, 41818, 41970, 41808, 61017}
+local wwiAchievementIds     = {20597, 40791, 20596, 40309, 40360, 41052, 40618, 41818, 41970, 41808, 61017}
+local midnightAchievementIds = {61839}
+
 local Achievements = Class(TableFrame, function(self)
-  self.data = ns.lua.maps.map(
-    achievementIds,
-    function(achievementId)
-      local _, name, _, completed = GetAchievementInfo(achievementId)
-      if achievementId == 41818 then
-         local _, _, _, completedH = GetAchievementInfo(41820)
-         completed = completed or completedH
-      end
-      return {
-        {
-          text = name,
-          color = completed and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR,
-          onClick = function()
-            OpenAchievementFrameToAchievement(achievementId)
-          end,
-        },
-      }
+  self.data = {}
+  for _, achievementId in ipairs(self.achievementIds) do
+    self:addRow({backdrop = TransparentBackdrop})
+    local _, name, _, completed = GetAchievementInfo(achievementId)
+    if achievementId == 41818 then
+       local _, _, _, completedH = GetAchievementInfo(41820)
+       completed = completed or completedH
     end
-  )
+    insert(self.data, {
+      {
+        text = name,
+        color = completed and DIM_GREEN_FONT_COLOR or DIM_RED_FONT_COLOR,
+        onClick = function()
+          OpenAchievementFrameToAchievement(achievementId)
+        end,
+      },
+    })
+  end
 end, {
+  achievementIds = {},
   headerHeight = 0,
   headerWidth = 0,
   colInfo = {
     {width = 155, backdrop = TransparentBackdrop},
   },
-  rowInfo = ns.lua.maps.map(
-    achievementIds,
-    function() return {backdrop = TransparentBackdrop} end
-  ),
 })
 
 -- Overview
@@ -168,21 +170,56 @@ local Overview = Class(Frame, function(self)
       TopLeft = {5, -5},
     },
   }
-  self.factions = Factions:new{
+
+  self.tabFrame = TabFrame:new{
     parent = self,
+    tabs = {"Midnight", "WWI"},
     position = {
-      TopLeft = {self.topAlts, ui.edge.TopRight, 20, 0},
-    },
-  }
-  self.achievements = Achievements:new{
-    parent = self,
-    position = {
-      TopLeft = {self.factions, ui.edge.TopRight, 20, 0},
+      TopLeft = {self.topAlts, ui.edge.TopRight, 10, 0},
     },
   }
 
-  self:Height(20 + math.max(self.topAlts:Height(), self.factions:Height(), self.achievements:Height()))
-  self:Width(10 + 40 + self.topAlts:Width() + self.factions:Width() + self.achievements:Width())
+  -- Midnight tab (tab 1)
+  local midnightPanel = self.tabFrame:Tab(1)
+  self.midnightFactions = Factions:new{
+    parent = midnightPanel,
+    expansionLevel = 11,
+    position = { TopLeft = {0, 0} },
+  }
+  self.midnightAchievements = Achievements:new{
+    parent = midnightPanel,
+    achievementIds = midnightAchievementIds,
+    position = {
+      TopLeft = {self.midnightFactions, ui.edge.TopRight, 10, 0},
+    },
+  }
+
+  -- WWI tab (tab 2)
+  local wwiPanel = self.tabFrame:Tab(2)
+  self.wwiFactions = Factions:new{
+    parent = wwiPanel,
+    position = { TopLeft = {0, 0} },
+  }
+  self.wwiAchievements = Achievements:new{
+    parent = wwiPanel,
+    achievementIds = wwiAchievementIds,
+    position = {
+      TopLeft = {self.wwiFactions, ui.edge.TopRight, 10, 0},
+    },
+  }
+
+  -- size the tab frame to fit the larger of the two tab contents
+  local wwiW = self.wwiFactions:Width() + 10 + self.wwiAchievements:Width()
+  local wwiH = math.max(self.wwiFactions:Height(), self.wwiAchievements:Height())
+  local midW = self.midnightFactions:Width() + 10 + self.midnightAchievements:Width()
+  local midH = math.max(self.midnightFactions:Height(), self.midnightAchievements:Height())
+  local tabW = math.max(wwiW, midW)
+  local tabH = self.tabFrame.tabHeight + math.max(wwiH, midH)
+  self.tabFrame:Width(tabW)
+  self.tabFrame:Height(tabH)
+
+  self:Height(20 + math.max(self.topAlts:Height(), tabH))
+  self:Width(10 + self.topAlts:Width() + 10 + tabW)
 end, {
   name = "overview",
   _title = "Overview",
