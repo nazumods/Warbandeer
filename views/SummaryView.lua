@@ -43,9 +43,9 @@ local ClassSummary = Class(TableFrame, function(self)
     },
     color = alpha(WHITE_FONT_COLOR, 0.5),
   }
-  -- bump the next row down
+  -- bump the first sub-max row down 1px to clear the divider
   if n > 1 and self.rows[n] then
-    self.rows[n]:TopLeft(self.rows[n + 1], ui.edge.BottomLeft, 0, -1)
+    self.rows[n]:TopLeft(self.rows[n - 1], ui.edge.BottomLeft, 0, -1)
     self:Height(self:Height() + 1)
   end
   local counter = Label:new{
