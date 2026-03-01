@@ -123,12 +123,12 @@ function Appearances:GetData()
         }
         if (not v) and instructions[c] and instructions[c][k] then
           t.onEnter = function(self)
-            GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-            GameTooltip:ClearLines()
-            GameTooltip:AddLine(instructions[c][k], 1, 1, 1)
-            GameTooltip:Show()
+            ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+            ui.tip:ClearLines()
+            ui.tip:AddLine(instructions[c][k])
+            ui.tip:Show()
           end
-          t.onLeave = function() GameTooltip:Hide() end
+          t.onLeave = function() ui.tip:Hide() end
         end
         table.insert(s, t)
       end

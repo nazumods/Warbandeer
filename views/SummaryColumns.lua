@@ -102,12 +102,12 @@ local getILvlString = function(toon)
   return {
     text = toon.basic.level < ns.wow.maxLevel and ITEM_STANDARD_COLOR:WrapTextInColorCode(toon.equipment.ilvl) or ns.IlvlColor(toon.equipment.ilvl),
     onEnter = function(self)
-      GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-      GameTooltip:ClearLines()
-      for _,l in ipairs(lines) do GameTooltip:AddLine(l, 1, 1, 1) end
-      GameTooltip:Show()
+      ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+      ui.tip:ClearLines()
+      for _,l in ipairs(lines) do ui.tip:AddLine(l) end
+      ui.tip:Show()
     end,
-    onLeave = function(self) GameTooltip:Hide() end,
+    onLeave = function(self) ui.tip:Hide() end,
     onClick = function(self) self.parent:view("gear") end,
   }
 end
@@ -163,14 +163,14 @@ local formatTaskWWIRep = function(toon)
       text = toon.quests.WWIRep.missing,
       justifyH = ui.justify.Center,
       onEnter = function(self)
-        GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-        GameTooltip:ClearLines()
+        ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+        ui.tip:ClearLines()
         for _,zone in ipairs({"Dornogal", "Assembly", "Hallowfall", "Azjkahet", "Undermine", "Arathi", "Karesh"}) do
-          GameTooltip:AddLine(zone..' '..(toon.quests.WWIRep[zone] and 'true' or 'false'), 1, 1, 1)
+          ui.tip:AddLine(zone..' '..(toon.quests.WWIRep[zone] and 'true' or 'false'))
         end
-        GameTooltip:Show()
+        ui.tip:Show()
       end,
-      onLeave = function(self) GameTooltip:Hide() end,
+      onLeave = function(self) ui.tip:Hide() end,
     }
   end
   return ""
@@ -210,16 +210,16 @@ local function formatBestVaultRewardOption(o)
     onEnter = function(self)
       self.label:Color(1, 1, 1, 0.8)
       if #lines > 1 then
-        GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-        GameTooltip:ClearLines()
-        for _,l in ipairs(lines) do GameTooltip:AddLine(l, 1, 1, 1) end
-        GameTooltip:Show()
+        ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+        ui.tip:ClearLines()
+        for _,l in ipairs(lines) do ui.tip:AddLine(l) end
+        ui.tip:Show()
       end
     end,
     onLeave = function(self)
       self.label:Color(1, 1, 1, 1)
       if #lines > 1 then
-        GameTooltip:Hide()
+        ui.tip:Hide()
       end
     end,
   }

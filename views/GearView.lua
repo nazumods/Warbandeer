@@ -1,6 +1,5 @@
 local _, ns = ...
 local ui = ns.ui
--- luacheck: globals GameTooltip
 
 local Class, TableFrame = ns.lua.Class, ui.TableFrame
 local insert = table.insert
@@ -64,13 +63,13 @@ local getNameString = function(toon)
     text = s,
     color = ns.Colors[toon.classKey or toon.className],
     onEnter = function(self)
-      GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-      GameTooltip:ClearLines()
-      GameTooltip:AddLine(toon.realm, 1, 1, 1)
-      GameTooltip:AddLine(toon.specializationActive, 1, 1, 1)
-      GameTooltip:Show()
+      ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+      ui.tip:ClearLines()
+      ui.tip:AddLine(toon.realm)
+      ui.tip:AddLine(toon.specializationActive)
+      ui.tip:Show()
     end,
-    onLeave = function(self) GameTooltip:Hide() end,
+    onLeave = function(self) ui.tip:Hide() end,
   }
 end
 
@@ -84,12 +83,12 @@ local getILvlString = function(toon)
   return {
     text = toon.basic.level < ns.wow.maxLevel and (ITEM_STANDARD_COLOR:WrapTextInColorCode(toon.equipment.ilvl)) or ns.IlvlColor(toon.equipment.ilvl),
     onEnter = function(self)
-      GameTooltip:SetOwner(self._widget, "ANCHOR_BOTTOMRIGHT", -10, 10)
-      GameTooltip:ClearLines()
-      for _,l in ipairs(lines) do GameTooltip:AddLine(l, 1, 1, 1) end
-      GameTooltip:Show()
+      ui.tip:AnchorTo(self, "ANCHOR_BOTTOMRIGHT", -10, 10)
+      ui.tip:ClearLines()
+      for _,l in ipairs(lines) do ui.tip:AddLine(l) end
+      ui.tip:Show()
     end,
-    onLeave = function(self) GameTooltip:Hide() end,
+    onLeave = function(self) ui.tip:Hide() end,
   }
 end
 
