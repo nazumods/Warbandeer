@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ...
 -- luacheck: globals LibNAddOn LibNUI WarbandeerApi
 
-local Views = {"Overview", "Races", "Summary", "Gear", "Detail", "Roles"}
+local Views = {"Overview", "Races", "Summary", "Gear", "Detail", "Roles", "Professions"}
 
 LibNAddOn{
   name = ADDON_NAME,
